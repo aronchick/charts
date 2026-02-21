@@ -131,6 +131,7 @@ jobs:
       contents: read
       pull-requests: write
     needs: [setup]
+    if: ${{ needs.setup.outputs.run_build == 'true' }}
 
     outputs:
       pr-content-error-message: ${{ steps.validate-submission.outputs.pr-content-error-message }}
@@ -461,8 +462,9 @@ jobs:
         with:
           python-version: ${{ steps.setup-python.outputs.python-version }}
 
-      # Submission information should always be present
+      # Submission information should always be present when a chart build is required
       - name: Download submission information
+        if: ${{ needs.setup.outputs.run_build == 'true' }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.SUBMISSION_ARTIFACT_NAME }}
