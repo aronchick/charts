@@ -41,8 +41,14 @@ jobs:
         run: |
           LATEST_TAG="${{ steps.get_latest_version.outputs.latest_tag }}"
           CURRENT_TAG="${{ steps.get_current_version.outputs.current_tag }}"
-          
-          if [ "$LATEST_TAG" != "$CURRENT_TAG" ]; then
+          CHART_DIR="charts/partners/expanso/expanso-edge"
+
+          # Check whether a version directory already exists before deciding to update
+          CURRENT_DIR=$(find $CHART_DIR -maxdepth 1 -type d -name "*.*.*" | head -1)
+          if [ -z "$CURRENT_DIR" ]; then
+            echo "No existing version directory found in $CHART_DIR — manual chart setup required before auto-update can work."
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+          elif [ "$LATEST_TAG" != "$CURRENT_TAG" ]; then
             echo "Version update needed: $CURRENT_TAG -> $LATEST_TAG"
             echo "needs_update=true" >> $GITHUB_OUTPUT
             echo "new_version=$LATEST_TAG" >> $GITHUB_OUTPUT
@@ -64,7 +70,12 @@ jobs:
           
           # Find the current version directory
           CURRENT_DIR=$(find $CHART_DIR -maxdepth 1 -type d -name "*.*.*" | head -1)
-          
+
+          if [ -z "$CURRENT_DIR" ]; then
+            echo "No existing version directory found in $CHART_DIR — manual chart setup required before auto-update can work."
+            exit 0
+          fi
+
           # Create new version directory if needed
           NEW_DIR="$CHART_DIR/$NEW_VERSION"
           if [ "$CURRENT_DIR" != "$NEW_DIR" ]; then
