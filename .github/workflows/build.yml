@@ -57,7 +57,7 @@ jobs:
       - name: Check for CI changes
         id: check_ci_changes
         env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN || github.token }}
           PR_AUTHOR_LOGIN: ${{ github.event.pull_request.user.login }}
           PR_API_URL: ${{ github.event.pull_request._links.self.href }}
         run: |
@@ -70,7 +70,7 @@ jobs:
         if: ${{ steps.check_ci_changes.outputs.run-tests != true }}
         env:
           BOT_NAME: ${{ secrets.BOT_NAME }}
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN || github.token }}
           PR_API_URL: ${{ github.event.pull_request._links.self.href }}
           PR_SENDER: ${{ github.event.sender.login }}
           PR_BRANCH: ${{ github.event.pull_request.head.ref }}
